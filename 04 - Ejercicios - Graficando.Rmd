@@ -1,0 +1,230 @@
+---
+title: "04 - Ejercicios - Graficando"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: Juan Martin Arrizubieta
+
+Para realizar estos ejercicios use como referencia el documento "04 - Graficando.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (04 - Ejercicios - Graficando - SuNombre Apellido.Rmd), y me lo envía por email.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+# Cargar datos de Girasol
+
+-   Cargue los datos de Girasol que construyó en la práctica de Data Frames. Recuerde que siempre debe preparar los datos antes de graficarlos.
+
+```{r}
+# Verifico que el paquete 'readr' esté instalado
+if (!require(readr)) {
+  install.packages("readr")
+  library(readr)
+} else {
+  library(readr)
+}
+
+
+girasoles <- read_csv("G:/Otros ordenadores/Mi portátil/2do año ISETA/Estadistica I/Projects in R/Practica/Ejercicios DataFrames/datos_girasol.csv")
+
+girasoles
+
+
+```
+
+
+# Graficar con ggplot2
+
+```{r}
+if (!require(ggplot2)) {
+  install.packages("ggplot2")
+  library(ggplot2)
+} else {
+  library(ggplot2)
+}
+
+grafico <- ggplot(girasoles) +
+  aes(x = Densidad, y = Altura) +
+  geom_line()
+
+grafico
+
+```
+
+
+## Histograma
+
+-   Haga un histograma con los datos de girasol diferenciando los tratamientos.
+
+```{r}
+
+grafico1 <- ggplot(girasoles) +
+  aes(x = Altura) +
+  geom_histogram()
+
+grafico1
+
+```
+
+
+-   Haga un histograma con los datos de girasol separando los gráficos por tratamients con "facet".
+
+```{r}
+
+grafico1 <- ggplot(girasoles) +
+  aes(x = Altura) +
+  geom_histogram(fill ="blue", color = "black") + 
+  facet_wrap(vars(Densidad), dir = "v")
+
+grafico1
+
+```
+
+
+##  Polígono de Frecuencias
+
+-   ídem anterior pero cambiando la geometría a Polígono de Frecuencias
+
+```{r}
+
+grafico2 <- ggplot(girasoles) +
+  aes(x = Altura) +
+  geom_freqpoly(color = "black") + 
+  facet_wrap(vars(Densidad), dir = "v")
+
+grafico2
+
+```
+
+
+## Gráfico de Densidad
+
+-   ídem anterior pero cambiando la geometría a Densidad
+
+```{r}
+
+grafico3 <- ggplot(girasoles) +
+  aes(x = Altura) +
+  geom_freqpoly(color="black") + 
+  geom_density()
+
+grafico3
+
+```
+
+
+## Densidad Acumulada
+
+-   ídem anterior pero cambiando la geometría a Densidad Acumulada
+
+```{r}
+
+grafico4 <- ggplot(girasoles) +
+  aes(x = Altura) +
+  geom_freqpoly(aes(y=cumsum(..count..)))
+
+grafico4
+
+```
+
+
+## BoxPlot
+
+-   ídem anterior pero cambiando la geometría a BoxPlot
+
+```{r}
+
+grafico5 <- ggplot(girasoles) +
+  aes(x = Altura, y = Densidad) +
+  geom_boxplot()
+
+grafico5
+
+```
+
+
+## Violin
+
+-   ídem anterior pero cambiando la geometría a Violín
+
+```{r}
+
+grafico6 <- ggplot(girasoles) +
+  aes(x = Altura, y = Densidad) +
+  geom_violin()
+
+grafico6
+
+```
+
+
+## Gráficos superpuestos
+
+-   Superponga en un mismo gráfico un histograma y un Polígono de Frecuencias.
+
+```{r}
+
+grafico7 <- ggplot(girasoles) +
+  aes(x = Altura) +
+  geom_histogram(color = "grey") +
+  geom_freqpoly(color = "red") +
+  facet_wrap(vars(Densidad), dir = "v")
+
+grafico7
+
+```
+
+
+-   Superponga en un mismo gráfico un BoxPlot y un Violín.
+
+```{r}
+
+grafico8 <- ggplot(girasoles) +
+  aes(x = Altura, y = Densidad) +
+  geom_violin(color = "grey") +
+  geom_boxplot(color = "red")
+
+grafico8
+
+```
+
+
+# Cargar datos de Fuel Consumption
+
+Los siguientes datos de girasol no sirven para los gráfico siguientes porque sólo contienen una variable, y seguidamente necesitaremos al menos 2.
+-   Cargue los datos de Fuel Consumption que usó en la práctica de Data Frames.
+
+```{r}
+
+if (!require(openxlsx)) {
+  install.packages("openxlsx")
+  library(openxlsx)
+} else {
+  library(openxlsx)
+}
+
+consumo <- read.xlsx("G:/Otros ordenadores/Mi portátil/2do año ISETA/Estadistica I/FuelConsumption.xlsx")
+
+consumo
+
+```
+
+
+## Gráfico de dispersión
+
+-   Haga un gráfico de dispersión que relacione las emisiones de CO2 y el consumo de combustible.
+
+
+```{r}
+
+grafico9 <- ggplot(consumo) +
+  aes(x = FUEL.CONSUMPTION, y = COEMISSIONS) +
+    geom_point() +
+  geom_smooth(method = lm, se=FALSE)
+
+grafico9
+
+```
+

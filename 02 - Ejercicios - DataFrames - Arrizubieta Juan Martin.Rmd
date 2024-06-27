@@ -1,0 +1,290 @@
+---
+title: "02 - Data Frames"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: Arrizubieta Juan Martin
+
+Para realizar estos ejercicios use como referencia el documento "02 - DataFrames.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (02 - Ejercicios - DataFrames - SuNombre Apellido.Rmd), y me lo envía por email.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+# Tidyverse y estructuras Tidy.
+
+## Fuel Consumption
+
+-   Cargue los datos del archivo "FuelConsumption.xlsx" que está en la carpeta "datos". Los dato fueron obtenidos del siguiente sitio: <https://kaggle.com/datasets/krupadharamshi/fuelconsumption?resource=download> En el sitio encontrará referencias para comprender los datos.
+
+
+
+
+```{r}
+
+# Cargo la librería readxl
+library(readxl)
+
+# ruta completa al archivo Excel
+
+ruta_excel <- "G:/Otros ordenadores/Mi portátil/2do año ISETA/Estadistica I/FuelConsumption.xlsx"
+
+# Leer el archivo Excel
+consumos <- readxl::read_excel(ruta_excel)
+
+head(consumos)
+
+
+```
+
+
+-   Asegurese de controlar el tipo de datos de cada columna. Por ejemplo, CYLINDERS debería ser integer, MAKE podría ser factor. Decida usted qué tipo de datos representa mejor a cada variable.
+
+
+```{r}
+
+library(dplyr)
+
+consumos_transformed <- consumos %>%
+  mutate(
+    Year = as.integer(Year),
+    MAKE = as.factor(MAKE),
+    MODEL = as.character(MODEL),
+    `VEHICLE CLASS` = as.factor(`VEHICLE CLASS`),
+    `ENGINE SIZE` = as.numeric(`ENGINE SIZE`),
+    CYLINDERS = as.numeric(CYLINDERS),
+    TRANSMISSION = as.character(TRANSMISSION),
+    FUEL = as.character(FUEL),
+    `FUEL CONSUMPTION` = as.numeric(`FUEL CONSUMPTION`),
+    COEMISSIONS = as.integer(COEMISSIONS)
+  )
+
+head(consumos_transformed)
+
+
+```
+
+
+-   Convierta el dataset a Tidy. Hágalo como le parezca, tendremos tiempo de discutir estas decisiones. Puede usar la función pivot_longer().
+
+```{r}
+
+library(tidyr)
+
+consumos_tidy <- consumos_transformed %>%
+  pivot_longer(cols = c("ENGINE SIZE", "CYLINDERS", "FUEL CONSUMPTION", "COEMISSIONS"),
+               names_to = "Variable",
+               values_to = "Valor")
+
+head(consumos_tidy)
+
+
+```
+
+
+-   Cree al menos una columna usando información de las otras.
+
+```{r}
+consumos_km <- consumos_transformed %>%
+  mutate(`EFICIENCIA (KM)` = 100 / `FUEL CONSUMPTION`)
+
+consumos_km
+```
+
+
+-   Cree un nuevo tibble con información parcial del dataset anterior. Puede filtrar y reducir la cantidad de filas y elegir algunas columnas.
+
+```{r}
+
+tibble_cars_4c <- consumos_transformed %>%
+  filter(CYLINDERS == 4) %>%
+  select(Year, MAKE, MODEL, `VEHICLE CLASS`, `ENGINE SIZE`, CYLINDERS, `FUEL CONSUMPTION`)
+
+head(tibble_cars_4c)
+
+```
+
+
+-   Guarde los datos del nuevo tibble en un archivo.csv externo. Verifique que puede leerlos fuera de R y volver a cargarlos a R.
+
+```{r}
+
+write.csv(tibble_cars_4c, "tibble_cars_4c.csv", row.names = FALSE)
+
+tibble_cars_4c_read <- read.csv("tibble_cars_4c.csv")
+
+head(tibble_cars_4c_read)
+
+```
+
+
+-   Guarde los datos del nuevo tibble y los del archivo original en dos tablas de una base de datos SQLite. Verifique que puede leerlos fuera de R y volver a cargarlos a R.
+
+```{r}
+
+library(DBI)
+library(RSQLite)
+
+con <- dbConnect(RSQLite::SQLite(), "fuel_consumption.db")
+dbWriteTable(con, "consumos_original", consumos_transformed, overwrite = TRUE)
+dbWriteTable(con, "tibble_cars_4c", tibble_cars_4c, overwrite = TRUE)
+consumos_original_db <- dbReadTable(con, "consumos_original")
+tibble_cars_4c_db <- dbReadTable(con, "tibble_cars_4c")
+
+head(consumos_original_db)
+head(tibble_cars_4c_db)
+
+```
+
+
+## Girasol
+
+Los siguientes datos fueron obtenidos del libro:
+
+-   Batista William (2020). Introducción a la inferencia estadística aplicada. 2da Ed. Editorial Facultad de Agronomía. 272 pgs. <https://www.agro.uba.ar/catalog/introducci-n-la-inferencia-estad-stica-aplicada-3ra-edici-n>
+
+Los datos son la "Altura de cada planta de girasol (cm)", medidas en parcelas experimentales sembradas en dos densidades (plantas por m2) diferentes. Se midieron 40 plantas pertenecientes a cada uno de los 2 tratamientos de densidad:
+
+Parcelas de 5 pl/m2. 213 221 220 210 205 224 215 212 225 216 207 205 215 213 213 215 214 199 215 215 210 201 209 204 197 202 221 221 226 219 215 222 212 208 208 219 198 217 208 193
+
+Parcelas de 10 pl/m2. 230 221 223 209 233 230 231 221 213 214 219 238 229 224 230 226 208 216 222 218 222 219 222 223 234 211 226 217 233 211 231 220 219 226 227 226 218 215 224 229
+
+-   Cree un tibble con la información del experimento.
+
+```{r}
+install.packages("tibble")
+install.packages("readr")
+install.packages("RSQLite")
+
+library(tibble)
+library(readr)
+library(RSQLite)
+
+# Datos de las parcelas
+alturas_5_pl_m2 <- c(213, 221, 220, 210, 205, 224, 215, 212, 225, 216, 207, 205, 215, 213, 213, 215, 214, 199, 215, 215, 
+                     210, 201, 209, 204, 197, 202, 221, 221, 226, 219, 215, 222, 212, 208, 208, 219, 198, 217, 208, 193)
+
+alturas_10_pl_m2 <- c(230, 221, 223, 209, 233, 230, 231, 221, 213, 214, 219, 238, 229, 224, 230, 226, 208, 216, 222, 218,
+                      222, 219, 222, 223, 234, 211, 226, 217, 233, 211, 231, 220, 219, 226, 227, 226, 218, 215, 224, 229)
+
+datos <- tibble(
+  Densidad = rep(c("5_pl_m2", "10_pl_m2"), each = 40),
+  Altura = c(alturas_5_pl_m2, alturas_10_pl_m2)
+)
+
+print(datos)
+
+
+```
+
+
+
+-   Guarde esa información en un archivo .csv y en otra tabla de la base de datos SQLite.
+
+```{r}
+
+# Guardo el tibble en un archivo CSV
+write_csv(datos, "datos_girasol.csv")
+
+# SQLite
+
+# Base de datos SQLite
+con <- dbConnect(SQLite(), dbname = "girasol.db")
+
+# Guardo el tibble en una tabla de la base de datos SQLite
+dbWriteTable(con, "datos_girasol", datos, overwrite = TRUE)
+
+# Verifico que los datos se hayan guardado
+dbListTables(con)
+
+
+```
+
+
+
+
+## Acceder a la información de un tibble
+
+### Fuel Consumption
+
+-   Extraiga el dato contenido en una celda.
+
+```{r}
+
+
+dato_celda <- consumos_transformed$`FUEL CONSUMPTION`[1]
+dato_celda
+
+
+```
+
+
+-   Extraiga todos los datos de un automovil en particular.
+
+```{r}
+
+# Auto marca 'AUDI' y modelo 'A4' 
+audi <- consumos_transformed %>% filter(MAKE == "AUDI", MODEL == "A4")
+audi
+
+
+```
+
+
+-   Muestre los valores de una variable para todos los automóviles disponibles.
+
+```{r}
+
+unique(consumos$MAKE)
+
+```
+
+
+-   Calcule el consumo de combustible promedio de los vehículos con 4 cilindros.
+
+```{r}
+
+consumos_4c <- subset(consumos, CYLINDERS == 4)
+consumo_promedio_4c <- mean(consumos_4c$`FUEL CONSUMPTION`)
+print(consumo_promedio_4c)
+
+
+```
+
+
+-   Muestre las emisiones de CO2 de los autos compactos de AUDI.
+
+```{r}
+
+autos_audi <- subset(consumos, MAKE == "AUDI" & `VEHICLE CLASS` == "COMPACT")
+emisiones_audi <- autos_audi$COEMISSIONS
+print(emisiones_audi)
+
+
+```
+
+
+### Girasol
+
+-   ¿Cuál es el promedio de altura de cada tratamiento?
+
+```{r}
+
+# Muestro los datos de altura de girasol
+alturas_5_pl_m2 <- c(213, 221, 220, 210, 205, 224, 215, 212, 225, 216, 207, 205, 215, 213, 213, 215, 214, 199, 215, 215, 
+                     210, 201, 209, 204, 197, 202, 221, 221, 226, 219, 215, 222, 212, 208, 208, 219, 198, 217, 208, 193)
+alturas_10_pl_m2 <- c(230, 221, 223, 209, 233, 230, 231, 221, 213, 214, 219, 238, 229, 224, 230, 226, 208, 216, 222, 218,
+                      222, 219, 222, 223, 234, 211, 226, 217, 233, 211, 231, 220, 219, 226, 227, 226, 218, 215, 224, 229)
+
+# Calculo los promedios de altura
+promedio_5_pl_m2 <- mean(alturas_5_pl_m2)
+promedio_10_pl_m2 <- mean(alturas_10_pl_m2)
+
+promedio_5_pl_m2
+promedio_10_pl_m2
+
+
+```
+

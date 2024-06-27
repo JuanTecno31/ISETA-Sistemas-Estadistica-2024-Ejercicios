@@ -1,0 +1,769 @@
+---
+title: "01 - Ejercicios - Bases de R - Juan Martin Arrizubieta"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: Juan Martin Arrizubieta
+
+Para realizar estos ejercicios use como referencia el documento "01 - Bases de R.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (01 - Ejercicios - Bases de R - SuNombre Apellido.Rmd), y me lo envía por email.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+# Tipos de datos (Numeric, character , logical, y varios tipos para fechas y tiempos)
+
+## Numeric
+
+-   Cree objetos de la clase numeric y verifique con class() y typeof().
+
+```{r}
+a <- 31
+b <- 3.5
+c <- -5
+d <- 3/2
+e <- 4^2
+f <- 17^1/2
+
+cat('El elemento', a, 'es un dato', class(a), 'y de tipo', typeof(a), '\n')
+cat('El elemento', b, 'es un dato', class(b), 'y de tipo', typeof(b), '\n')
+cat('El elemento', c, 'es un dato', class(c), 'y de tipo', typeof(c), '\n')
+cat('El elemento', d, 'es un dato', class(d), 'y de tipo', typeof(d), '\n')
+cat('El elemento', e, 'es un dato', class(e), 'y de tipo', typeof(e), '\n')
+cat('El elemento', f, 'es un dato', class(f), 'y de tipo', typeof(f), '\n')
+
+```
+
+-   Averigüe cómo crear un objeto de la case integer.
+
+```{r}
+#Tomo los números del chunk 1 y los vuelvo enteros con la funcion "as.integer"
+
+# b = 3.5 
+# d = 3/2 y,
+# f = 17^1/2
+
+a <- as.integer(b)
+b <- as.integer(d)
+c <- as.integer(f)
+
+# La función "as.integer" solo toma la parte entera del número, es decir, borra los números luego de la coma.
+
+cat('El elemento', a, 'es un dato', class(a), 'y de tipo', typeof(a), '\n')
+cat('El elemento', b, 'es un dato', class(b), 'y de tipo', typeof(b), '\n')
+cat('El elemento', c, 'es un dato', class(c), 'y de tipo', typeof(c), '\n')
+
+```
+
+
+-   ¿Qué son los objetos pi y exp(1)?
+
+```{r}
+cat('Los objetos pi y exp(1) son números irracionales. El objeto pi representa el número pi (aproximadamente ',pi,'), que es una constante matemática que representa la relación entre la circunferencia de un círculo y su diámetro. El objeto exp(1) representa la función exponencial evaluada en 1, es decir, el número de Euler elevado a la potencia de 1, que es aproximadamente igual a ',exp(1),'. Estos objetos son útiles en cálculos matemáticos y son parte de las funciones y constantes predefinidas en RStudio. \n')
+
+```
+
+
+## Character
+
+-   Cree tres objetos de texto y concaténelos de 3 maneras diferentes. Use los siguientes separadores: un espacio, un guión y sin espacio. Pruebe las funciones paste() y print(). ¿Qué las diferencia?
+
+```{r}
+
+txt1 <- 'Análisis'
+txt2 <- 'de'
+txt3 <- 'Sistemas'
+
+#Utilizo la función paste() y le asigno una variable distinta a cada una de las oraciones.
+
+texto1 <- paste(txt1, txt2, txt3, sep = ' ')
+texto2 <- paste(txt1, txt2, txt3, sep = '-')
+texto3 <- paste(txt1, txt2, txt3, sep = '')
+
+#Hasta este punto no se muestra nada en pantalla porque todavia no utilicé la funcion 'print()'
+
+cat('Utilizando la función print(): ')
+
+print(texto1)
+print(texto2)
+print(texto3)
+
+#También puedo llamar a las variables sin la función 'print()' y la pantalla va a mostrar las oraciones ya que R llamará implícitamente a print() para mostrar el valor del objeto.
+
+cat('Sin utilizar la función print(): ')
+
+texto1
+texto2
+texto3
+
+#Entonces, la diferencia entre ambas funciones es que 'paste()' es una funcion que permite concatenar caracteres y 'print()' es una función utilizada para imprimir objetos en la consola o en un archivo de salida. 
+
+
+
+
+```
+
+
+## Logical
+
+-   Cree las tablas de verdad para los conectores lógicos "y" y "o" y considere también las combinaciones de la negación de las proposiciones. Ponga atención en el orden de ejecución.
+
+```{r}
+# Tabla de verdad para el conector lógico "y" (AND)
+tabla_and <- expand.grid(A = c(TRUE, FALSE), B = c(TRUE, FALSE))
+tabla_and$Resultado <- tabla_and$A & tabla_and$B
+names(tabla_and) <- c("A", "B", "A AND B")
+
+# Tabla de verdad para el conector lógico "o" (OR)
+tabla_or <- expand.grid(A = c(TRUE, FALSE), B = c(TRUE, FALSE))
+tabla_or$Resultado <- tabla_or$A | tabla_or$B
+names(tabla_or) <- c("A", "B", "A OR B")
+
+# Tabla de verdad para la negación de las proposiciones
+tabla_negacion <- data.frame(Proposicion = c(TRUE, FALSE), Negacion = !c(TRUE, FALSE))
+
+# Imprimir las tablas
+print("Tabla de verdad para el conector lógico 'y' (AND):")
+print(tabla_and)
+cat("\n")
+
+print("Tabla de verdad para el conector lógico 'o' (OR):")
+print(tabla_or)
+cat("\n")
+
+print("Tabla de verdad para la negación de las proposiciones:")
+print(tabla_negacion)
+
+```
+
+
+## Date and Time.
+
+-   ¿Qué día Juliano es su cumpleaños?
+
+```{r}
+
+if(!require("tidyverse")){
+    install.packages("tidyverse")
+}
+
+FechaCump <- as.Date('2024-08-31')
+DiaJuliano <- yday(FechaCump)
+
+cat('El dia Juliano de mi cumpleaños es: ', DiaJuliano)
+```
+
+-   ¿Cuántos días hay entre su último cumpleaños y hoy?
+
+```{r}
+
+Canterior <- as.Date('2023-08-31')
+Hoy <- today()
+
+Diferencia <- abs(Hoy - Canterior)
+
+cat('Entre mi ultimo cumpleaños y hoy pasaron', Diferencia, 'dias.')
+
+
+```
+
+
+-   ¿Cuántos días faltan para su próximo cumpleaños?
+
+```{r}
+
+Faltan <- if_else(Hoy >= FechaCump, 
+  yday(FechaCump) - yday(Hoy) + 365, #Si mi cumpleaños ya pasó me dará un número negativo, por eso le sumo 365 
+  yday(FechaCump) - yday(Hoy))
+
+cat('Para mi cumpleaños faltan', Faltan, 'dias.')
+```
+
+-   ¿Cuánto tiempo ha transcurrido desde su nacimiento?
+
+```{r}
+FechaNac <- as.Date('1996-08-31')
+tiempo <- FechaCump - FechaNac
+cat('Desde mi nacimiento hasta hoy transcurrieron: ', tiempo, 'dias')
+```
+
+-   ¿Cuánto tiempo vivió El Diego?
+
+```{r}
+
+NacDiego <- as.Date('1960-10-03')
+FalDiego <- as.Date('2020-11-25')
+
+vivio <- FalDiego - NacDiego
+
+cat("Diego Armando Maradona ('El Diego') vivió", vivio, 'dias')
+
+```
+
+
+-   ¿Qué día de la semana nació El Diego?
+
+```{r}
+
+nombres_dias <- c("Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado")
+
+dia_nac <- wday(NacDiego)
+
+DiaSemana <- nombres_dias[dia_nac]
+
+# Imprimo el resultado
+cat('El Diego nació el día', DiaSemana)
+```
+
+-   ¿Qué semana del año murió El Diego?
+
+```{r}
+
+week_dead <- week(FalDiego)
+
+cat('El diego murió en la semana del año número', week_dead)
+
+```
+
+
+-   ¿Qué diferencia de edad tienen usted y El Diego?
+
+```{r}
+
+Dif_años <- abs(year(NacDiego) - year(FechaNac))
+Dif_mes <- abs(month(NacDiego) - month(FechaNac))
+Dif_dias <- abs(day(NacDiego) - day(FechaNac))
+
+año <- paste(Dif_años,'Años', sep = ' ')
+mes <- paste(Dif_mes,'Meses y', sep = ' ')
+dia <- paste(Dif_dias,'Dias', sep = ' ')
+
+cat('Con El Diego nos llevamos', año, mes, dia)
+```
+
+
+
+# Estructuras de datos
+
+## Vectores
+
+-   Cree un vector con los días julianos correspondientes a 50, 100, 150, 200, 250, 300 y 350 días después de su último cumpleaños.
+
+```{r}
+
+# Defino nuevamente la fecha del último cumpleaños
+ultimo_cumpleanos <- as.Date("2023-08-31")
+
+# Defino el vector de x días después del último cumpleaños
+dias_despues <- c(50, 100, 150, 200, 250, 300, 350)
+
+# Calculo las fechas correspondientes a cada número de días después del último cumpleaños
+fechas_despues <- ultimo_cumpleanos + dias_despues
+
+# Convierto las fechas en días julianos
+dias_julianos <- as.numeric(format(fechas_despues, "%j"))
+
+# Muestro el resultado
+
+for (i in 1:length(dias_despues)) {
+  cat('Luego de', dias_despues[i], 'días de mi cumpleaños, el día juliano es:', dias_julianos[i], '\n')
+}
+
+
+```
+
+
+-   Cree un vector con los días de la semana (como palabras) corerspondientes a las fechas del inciso anterior.
+
+```{r}
+
+# Obtener el día de la semana para cada fecha
+dias_semana <- weekdays(fechas_despues)
+
+# Muestro el resultado
+for (i in 1:length(dias_despues)) {
+  cat('El día', dias_despues[i], 'después de mi cumpleaños cae', dias_semana[i], '\n')
+}
+
+
+```
+
+
+-   Cree un vector con las superficies correspondientes a 5 cuadrados. El primer cuadrado tiene lados de 1m de largo, el segundo tiene lados el doble de largos que el cuadrado anterior, el tercero el triple del cuadrado del doble del inicial... y así sigue la serie. (es decir: 1, 2 * 1, 3 * 2 * 1, ...)
+
+```{r}
+
+cuadrados <- c(1,2,3,4,5) # Número de cuadrados
+superficie <- numeric(length(cuadrados))
+lado <- 1 # Inicializo la variable que va a guardar la medida de los lados
+
+for (i in 1:length(cuadrados)) {
+  lado <- factorial(i)
+  superficie[i] <- lado^2
+  cat('La superficie del cuadrado', cuadrados[i], 'es', superficie[i],'\n')
+}
+
+```
+
+
+-   Cree un vector con los precios de 6 productos y otro con las cantidades vendidas de dichos productos. ¿Cuánto fué el ingreso total de las ventas?
+
+```{r}
+# Defino el vector con los precios de los productos
+precios <- c(10, 20, 15, 25, 30, 18)
+
+# Defino el vector con las cantidades vendidas de los productos
+cantidades <- c(100, 50, 80, 120, 70, 90)
+
+# Calculo el ingreso total de las ventas
+ingreso_total <- sum(precios * cantidades)
+
+# Se muestra el resultado
+cat('El ingreso total de las ventas fue de $', ingreso_total, '\n')
+
+```
+
+
+### Generador de secuencias
+
+-   Cree un vector de números del 21 al 354
+-   Cree un vector con una secuencia desde 0 hasta 700 saltando de a 7 usando la función seq()
+-   Cree el mismo vector anterior pero sin usar el método seq()
+
+```{r}
+
+numeros <- 21:354
+
+secuencia_con_seq <- seq(0, 700, by = 7)
+
+secuencia_sin_seq <- seq(0, length.out = 701, by = 7)
+
+```
+
+### Acceder a los elementos de un vector
+
+-   ¿Cuál es la superficie del tercer cuadrado del ejercicio anterior?
+
+```{r}
+
+cat('La superficie del tercer cuadrado es:',superficie[3])
+
+
+```
+
+
+-   ¿Cuáles son los números desde el 5to al 9no de la serie que salta de a siete?
+
+```{r}
+
+cat('Los numeros de esa serie son:',secuencia_con_seq[5:9])
+
+```
+
+-   Cree un vector que contenga las fechas correspondientes a los 100, 200 y 300 días posteriores a su último cumpleaños. No lo vuelva a calcular, rescate los valores del vector previamente creado.
+
+```{r}
+
+# Obtengo las fechas de los días 100, 200 y 300 posteriores al último cumpleaños
+fecha_dia_100 <- fechas_despues[2]
+fecha_dia_200 <- fechas_despues[4]
+fecha_dia_300 <- fechas_despues[6]
+
+# Muestro las fechas obtenidas y les pongo el formato de año-mes-dia
+cat("Fecha del día 100 posterior al último cumpleaños:", format(fechas_despues[1], "%Y-%m-%d"), "\n")
+cat("Fecha del día 200 posterior al último cumpleaños:", format(fechas_despues[2], "%Y-%m-%d"), "\n")
+cat("Fecha del día 300 posterior al último cumpleaños:", format(fechas_despues[3], "%Y-%m-%d"), "\n")
+
+```
+
+
+## Matrices
+
+Usted es un comerciante que vende 7 productos en 3 sucursales diferentes.
+
+-   Cree un vector con los precios de compra mayorista de los 7 productos que luego venderá.
+
+```{r}
+
+# Vector con los precios de compra mayorista
+precios_compra <- c(10, 15, 20, 25, 30, 35, 40)
+
+```
+
+-   Cree una matriz con los precios de venta de los 7 productos en las 3 sucursales diferentes.
+
+```{r}
+
+# Margen de ganancia (en porcentaje)
+margen_ganancia <- 0.3  # 30%
+
+# Agrego un margen de ganancia a los precios de compra
+precios_venta_suc <- matrix(precios_compra * (1 + margen_ganancia), nrow = 7, ncol = 3, byrow = FALSE)
+
+#Le pongo nombre a las filas y las columnas
+productos <- c("Producto1", "Producto2", "Producto3", "Producto4", "Producto5", "Producto6", "Producto7")
+sucursales <- c("Sucursal1", "Sucursal2", "Sucursal3")
+
+#Renombro las filas y columnas
+rownames(precios_venta_suc) <- productos
+colnames(precios_venta_suc) <- sucursales
+
+# Mostrar la matriz de precios de venta con margen de ganancia
+print(precios_venta_suc)
+
+
+```
+
+
+-   Cree una matriz con las ventas realizadas de los 7 productos anteriores en las 3 sucursales mencionadas.
+
+```{r}
+
+ventas_realizadas <- matrix(c(50, 55, 60,
+                               60, 65, 70,
+                               70, 75, 80,
+                               80, 85, 90,
+                               90, 95, 100,
+                               100, 105, 110,
+                               110, 115, 120), nrow = 7, byrow = FALSE)
+
+# Le pongo nombre a las filas y las columnas
+rownames(ventas_realizadas) <- productos
+colnames(ventas_realizadas) <- sucursales
+
+# Mostrar la matriz de ventas realizadas
+print(ventas_realizadas)
+
+```
+
+
+-   Cree una matriz, usando las anteriores, con la recaudación por producto y sucursal.
+
+```{r}
+
+# Creo la matriz de recaudación por producto y sucursal
+recaudacion <- precios_venta_suc * ventas_realizadas
+
+# Muestro la matriz de recaudación
+print(recaudacion)
+
+```
+
+
+-   Cree una matriz , usando las anteriores, con las ganancias por producto y por sucursal.
+
+```{r}
+
+# Calculo las ganancias por producto (Los precios de venta menos los precios de compra)
+ganancias_por_producto <- precios_venta_suc - precios_compra
+
+# Calculo las ganancias totales (por producto y por sucursal)
+ganancias <- ganancias_por_producto * ventas_realizadas
+
+# Mostrar la matriz de ganancias
+print(ganancias)
+
+
+```
+
+
+### Acceder a sus elementos
+
+Para las matrices del ejemplo anterior:
+
+-   ¿Cuál fué la recaudación total?, ¿y la ganancia?
+
+```{r}
+
+ganancia_total <- sum(recaudacion[,1])+ sum(recaudacion[,2]) + sum(recaudacion[,3]) 
+
+cat('La recaudación total fue de:',ganancia_total)
+
+
+
+```
+
+
+-   ¿Cuál fué la recaudación en la sucursal 2?, ¿y la ganancia?
+
+```{r}
+
+recaudacion_suc2 <- sum(recaudacion[,2])
+ganancia_suc2 <- sum(ganancias[,2])
+
+cat('La recaudación total en la sucursal 2 fue de',recaudacion_suc2,'y la ganancia total fue de',ganancia_suc2)
+
+```
+
+
+-   ¿Cuál fué la recaudación del producto 6?, ¿y la ganancia?
+
+```{r}
+
+recaudacion_prod6 <- sum(recaudacion[6,])
+ganancia_prod6 <- sum(ganancias[6,])
+
+cat('La recaudacion total del producto 6 fue de ', recaudacion_prod6, '\n')
+cat('La ganancia total del producto 6 fue de ', ganancia_prod6, '\n')
+
+```
+
+
+## Array.
+
+-   Imagine una inflación mensual del 13% y construya un array con la información del ejercicio anterior agregándole toda esa misma información pero en el mes siguiente.
+
+```{r}
+
+#Asigno las variables 'Hoy' y la variable 'Inflación'
+
+hoy <- today()
+inflacion <- 0.13
+
+# Creo un array vacio
+
+array_inf <- array(data = NA, dim = c(2,3,2))
+
+# En la primera dimension del array_inf le asigno los valores pedidos en la consigna del mes actual
+array_inf[,1,] <- recaudacion_prod6
+array_inf[,2,] <- ganancia_prod6
+array_inf[,3,] <- paste('Mes', month(hoy))
+
+# En la segunda dimensión del array_inf se muestran los totales con la inflacion en el mes siguiente
+array_inf[,1,2] <- recaudacion_prod6 * (1 + inflacion)
+array_inf[,2,2] <- ganancia_prod6 * (1 + inflacion)
+array_inf[,3,2] <- paste('Mes', (month(hoy) + month(1)))
+array_inf
+
+
+
+```
+
+
+### Acceder a sus elementos
+
+-   ¿Cuál fué la recaudación total y la ganancia en el mes siguiente?
+
+```{r}
+
+cat('En el',array_inf[1,3,2], 'se obtuvo una recaudación total de', (array_inf[1,1,2]), 'y una ganancia total de',array_inf[1,2,2])
+
+```
+
+
+-   ¿Cuál fué la recaudación y la ganancia en la sucursal 3 en el primer mes?
+
+```{r}
+
+recaudacion_suc3 <- sum(recaudacion[,3])
+ganancia_suc3 <- sum(ganancias[,3])
+
+cat('La recaudación total en la sucursal 3 el primer mes fue de',recaudacion_suc3,'y la ganancia total fue de',ganancia_suc3)
+
+
+```
+
+
+-   ¿Cuál fué la recaudación y la ganancia del producto 2 en los dos meses?
+
+```{r}
+
+# Tomo la suma total de la fila 2 de la matriz recaudacion
+mes1_prod2 <- sum(recaudacion[2,])
+
+# Tomo la suma total de la misma fila y le aplico la inflacion del segundo mes
+mes2_prod2 <- sum(recaudacion[2,]) * (1 + inflacion)
+
+# Tomo la suma total de la fila 2 de la matriz ganancias
+ganancias_mes1_prod2 <- sum(ganancias[2,])
+
+# Tomo la suma total de la misma fila y le aplico la inflacion del segundo mes
+ganancias_mes2_prod2 <- sum(ganancias[2,]) * (1 + inflacion)
+
+recaudacion_total_prod2 <- mes1_prod2 + mes2_prod2
+ganancia_total_prod2 <- ganancias_mes1_prod2 + ganancias_mes2_prod2
+
+# Muestro el total de la recaudacion y las ganancias con un mensaje
+
+cat('En los dos meses, el producto 2 tuvo una recaudacion total de',recaudacion_total_prod2,'y las ganancias fueron de', ganancia_total_prod2)
+
+```
+
+
+## Estructuras de datos heterogéneos
+
+## Listas
+
+-   Cree una lista con nombres de sus elementos donde almacene precio de compra, precio de venta, ventas, recaudación y ganancias de los productos 3 y 5 en el segundo mes.
+
+```{r}
+
+# Defino los datos para los productos 3 y 5 en el segundo mes
+precio_compra_3 <- precios_compra[3]
+precio_venta_3 <- precios_venta_suc[3, 2]
+ventas_3 <- ventas_realizadas[3, 2]
+recaudacion_3 <- recaudacion[3, 2]
+ganancia_3 <- ganancias[3, 2]
+
+precio_compra_5 <- precios_compra[5]
+precio_venta_5 <- precios_venta_suc[5, 2]
+ventas_5 <- ventas_realizadas[5, 2]
+recaudacion_5 <- recaudacion[5, 2]
+ganancia_5 <- ganancias[5, 2]
+
+# Creo la lista con los nombres de los elementos
+lista_productos <- list(
+  Producto_3 = list(
+    Precio_Compra = precio_compra_3,
+    Precio_Venta = precio_venta_3,
+    Ventas = ventas_3,
+    Recaudacion = recaudacion_3,
+    Ganancias = ganancia_3
+  ),
+  Producto_5 = list(
+    Precio_Compra = precio_compra_5,
+    Precio_Venta = precio_venta_5,
+    Ventas = ventas_5,
+    Recaudacion = recaudacion_5,
+    Ganancias = ganancia_5
+  )
+)
+
+# Mostrar la lista
+print(lista_productos)
+
+```
+
+
+### Acceder a sus elementos
+
+-   ¿Cuales fueron las ventas del producto 3? (obtenga la información de la lista anterior)
+
+```{r}
+
+# Obtengo las ventas del producto 3 de la lista
+ventas_producto_3 <- lista_productos$Producto_3$Ventas
+
+# Mostrar las ventas del producto 3
+cat("Las ventas del Producto 3 fueron:", ventas_producto_3)
+
+```
+
+
+
+# Funciones
+
+-   Cree una función que le permita acceder a las ganancias totales del producto que usted elija.
+
+```{r}
+
+# Primero creo una funcion sin argumentos ya que va a obtener las ganancias de 'x' producto cuando el usuario ingrese el número del producto
+obtener_ganancias_producto <- function() {
+  # En esta linea le solicito al usuario que ingrese un numero
+  producto_numero <- as.integer(readline("Ingrese el número del producto del cual desea obtener las ganancias: ")) 
+  # Luego se verifica si el número ingresado es válido, sino, vuelve a pedirlo
+  while (producto_numero < 1 || producto_numero > nrow(ganancias)) {
+    cat("Número de producto inválido. Debe estar entre 1 y", nrow(ganancias), "\n")
+    producto_numero <- as.integer(readline("Ingrese el número del producto del cual desea obtener las ganancias: "))
+  }
+  ganancias_producto <- ganancias[producto_numero, ]
+  ganancias_totales <- sum(ganancias_producto)
+  return(ganancias_totales)
+}
+
+```
+
+
+-   Cree una función que le permita acceder a las ganancias totales de la sucursal que usted elija.
+
+```{r}
+#Hago lo mismo que en el punto anterior, solo cambio el nombre de las variables. El numero solicitado es para indicar la sucursal
+
+obtener_ganancias_sucursal <- function() {
+  # En esta linea le solicito al usuario que ingrese un numero
+  numero_sucursal <- as.integer(readline("Ingrese el número de la sucursal de la cual desea obtener las ganancias totales: ")) 
+  # Luego se verifica si el número ingresado es válido
+  while (numero_sucursal < 1 || numero_sucursal > ncol(ganancias)) {
+    cat("Número de sucursal inválido. Debe estar entre 1 y", ncol(ganancias), "\n")
+    numero_sucursal <- as.integer(readline("Ingrese el número de la sucursal de la cual desea obtener las ganancias totales: "))
+  }
+  # Selecciono la columna correspondiente al número de sucursal ingresado
+  ganancias_sucursal <- ganancias[, numero_sucursal]
+  # Aca calculo la suma de las ganancias para la sucursal seleccionada
+  total_ganancias <- sum(ganancias_sucursal)
+  return(total_ganancias)
+}
+
+```
+
+
+-   Cree una función que le permita acceder a las ganancias totales de un producto en una sucursal.
+
+```{r}
+#Hago lo mismo que en el punto anterior, solo cambio el nombre de las variables y ahora le pido dos numeros al usuario, producto y sucursal
+
+obtener_ganancias_producto_sucursal <- function() {
+  
+  numero_producto <- as.integer(readline("Ingrese el número del producto: ")) 
+  while (numero_producto < 1 || numero_producto > nrow(ganancias)) {
+    cat("Número de producto inválido. Debe estar entre 1 y", nrow(ganancias), "\n")
+    numero_producto <- as.integer(readline("Ingrese el número del producto: "))
+  }
+  numero_sucursal <- as.integer(readline("Ingrese el número de la sucursal: ")) 
+  while (numero_sucursal < 1 || numero_sucursal > ncol(ganancias)) {
+    cat("Número de sucursal inválido. Debe estar entre 1 y", ncol(ganancias), "\n")
+    numero_sucursal <- as.integer(readline("Ingrese el número de la sucursal: "))
+  }
+  ganancias_producto_sucursal <- ganancias[numero_producto, numero_sucursal]
+  return(ganancias_producto_sucursal)
+}
+
+```
+
+-   Guarde en un archivo externo las funciones creadas. Cárguelas luego y pruebe su funcionalidad. (Recomendación, a las funciones almacenadas aparte póngales un nombre diferente así puede probar si cargan correctamente sin conflicto con las creadas en este documento)
+
+```{r}
+# Guardo las 3 funciones en una matriz archivo externo
+
+save_functions <- function(matriz_de_ganancias) {
+  save(
+    obtener_ganancias_producto,
+    obtener_ganancias_sucursal,
+    obtener_ganancias_producto_sucursal,
+    file = "funciones_ganancias.RData"
+  )
+}
+
+```
+
+
+```{r}
+
+# Chunk para probar la funcionalidad de las funciones cargadas desde el archivo externo
+
+# Cargo la función desde el archivo externo 
+
+load_functions <- function() {
+  load("funciones_ganancias.RData")
+}
+
+load_functions()
+
+
+# Pruebo cada función
+ganancias_producto_2 <- obtener_ganancias_producto()
+print(ganancias_producto_2)
+
+ganancias_sucursal_1 <- obtener_ganancias_sucursal()
+print(ganancias_sucursal_1)
+
+ganancias_prod2_suc1 <- obtener_ganancias_producto_sucursal()
+print(ganancias_prod2_suc1)
+
+
+```
+
+
+
