@@ -1,0 +1,542 @@
+---
+title: "05 - Ejercicios - Tendencia central y varianza"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: Arrizubieta Juan Martin
+
+Para realizar estos ejercicios use como referencia el documento "05 - Tendencia central y varianza.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (05 - Ejercicios - Tendencia central y varianza - SuNombre Apellido.Rmd), y me lo envía por email.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+## Experimento
+
+Existen experimentos manipulativos o mensurativos.
+
+Los manipulativos son aquellos en los que manipulamos algo y medimos variables sobre lo manipulado. Por ejemplo, regamos plantas de tomate con dos cantidades diferentes de agua y cierto tiempo depués medimos altura, peso, cantidad de hojas, cantidad de flores, cantidad de frutos, peso de los frutos, etc. de las plantasde tomate en ambos tratamientos.
+
+Los experimentos mensurativos en cambio, consisten en observar y medir algo "como está", y buscamos en la realidad un experimento que se haya hecho espontáneamente. Por ejemplo, encuestamos personas que hayan comprado en dos supermercados diferentes y les preguntamos qué compraron, cuánto compraron, qué faltó en el supermercado, qué decidieron no comprar, etc.
+
+En esta oportunidad usted debe realizar un experimento de cualquiera de los dos tipos y medir al menos 2 variables contínuas y dos discretas. Registre la información, organícela y luego cárguela para ser usada en R.
+
+En clases es conveniente que todos tengan la misma información a analizar, por esa razón en esta oportunidad le recomiendo que diseñen la actividad en grupos o inclusive todo el curso completo. Es importante para esta actividad involucrarse activamente en el diseño del experimento, la toma de datos y la digitalización de los mismos. Por esta última razón es preferible trabajar en grupos chicos si el trabajo entre todos le impide involucrarse activamente (trabajar de a muchos es difícil).
+
+La intensión no es lograr un experimento perfecto, trate de hacerlo lo mejor posible, pero es la primera vez y por lo tanto imposible que salga todo bien. Que las dificultades no sean un impedimento, avance aunque haya problemas y registre todo lo que le resulte importante, incluso los intentos fallidos.
+
+## Cargar la información
+
+-   Describa el experimento y las variables medidas. Describa cómo midió todo lo que midió. Describa cómo eligió lo que decidió medir.
+
+```{r}
+
+"Experimento 1 (Manipulativo): Medición de reflejos con una regla
+
+El objetivo del experimento es medir el tiempo de reacción de las personas utilizando una regla. Para ello, se deja caer una regla desde una altura fija y se mide la distancia en la regla donde la persona la agarra.
+
+Experimento 2 (Mensurativo): Medición del caudal de agua de diferentes canillas
+
+El objetivo del experimento es medir el caudal de agua que sale de diferentes canillas en una casa. Para ello, se mide el tiempo que tarda en llenarse un recipiente de un litro con agua de diferentes canillas."
+
+```
+
+-   Cree un tibble con la información recopilada.
+
+```{r}
+
+# Verificar si el paquete 'tibble' está instalado, instalarlo si es necesario
+if (!requireNamespace("tibble", quietly = TRUE)) {
+  install.packages("tibble")
+}
+
+library(tibble)
+
+"Experimento 1"
+
+# Tibble con los datos del experimento 1
+datos_reflejos <- tibble(
+  Persona = rep(c("Persona 1", "Persona 2"), each = 6),
+  Dominancia = rep("Diestra", 12),
+  Mano = rep(c("Derecha", "Izquierda"), each = 3, times = 2),
+  Repetición = rep(1:3, times = 4),
+  Distancia = c(17, 13, 13.5, 9, 8, 17, 8.5, 8, 6, 15, 17, 11.5)
+)
+
+print(datos_reflejos)
+
+"Experimento 2"
+
+# Tibble con los datos proporcionados
+datos_caudal <- tibble(
+  Canilla = c(rep("Cocina", 6), rep("Patio", 3), rep("Baño", 6)),
+  Temperatura = c(rep(c("Fría", "Caliente"), each = 3), rep(c("Fría"), each = 3), rep(c("Fría", "Caliente"), each = 3)),
+  Tiempo_Llenado = c(10, 9.6, 9, 9, 9, 8.8, 5, 5.5, 5, 10, 9.9, 9.79, 10.05, 9.9, 10.8)
+)
+
+# Mostrar el tibble creado
+print(datos_caudal)
+
+```
+
+
+# Descripción de las muestras
+
+Todos los índices siguientes deben calcularse sobre cada variable cuantitativa (contínua o discreta) del tibble creado.
+
+## Medidas de tendencia Central
+
+-   Mediana
+-   Moda
+-   Media
+
+```{r}
+
+# Primero que nada, verifico si estan instalados los paquetes "dyplr" y "modeest", sino, que se instalen.
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+  install.packages("dplyr")
+}
+
+if (!requireNamespace("modeest", quietly = TRUE)) {
+  install.packages("modeest")
+}
+
+library(dplyr)
+library(modeest)
+
+# Creo la función para calcular medidas de tendencia central
+calcular_tendencia_central <- function(datos, variable) {
+  mediana <- median(datos[[variable]])
+  moda <- mfv(datos[[variable]])[1]
+  media <- mean(datos[[variable]])
+  
+  tibble(
+    Mediana = mediana,
+    Moda = moda,
+    Media = media
+  )
+}
+
+# Medidas de tendencia central para el experimento 1 (datos_reflejos)
+tendencia_central_reflejos <- datos_reflejos %>%
+  group_by(Persona, Mano) %>%
+  summarise(
+    Mediana = median(Distancia),
+    Moda = mfv(Distancia)[1],
+    Media = mean(Distancia)
+  )
+
+print(tendencia_central_reflejos)
+
+# Medidas de tendencia central para el experimento 2 (datos_caudal)
+tendencia_central_caudal <- datos_caudal %>%
+  group_by(Canilla, Temperatura) %>%
+  summarise(
+    Mediana = median(Tiempo_Llenado),
+    Moda = mfv(Tiempo_Llenado)[1],
+    Media = mean(Tiempo_Llenado)
+  )
+
+print(tendencia_central_caudal)
+
+
+```
+
+
+## Medidas de variación
+
+-   Mínimo
+
+```{r}
+
+# Minimo del experimento 1:
+
+min_reflejos <- datos_reflejos %>%
+  summarise(
+    Minimo = min(Distancia)
+  )
+
+print(min_reflejos)
+
+
+# Minimo del experimento 2:
+
+min_caudal <- datos_caudal %>%
+  summarise(
+    Minimo = min(Tiempo_Llenado)
+  )
+
+print(min_caudal)
+
+
+```
+
+
+-   Máximo
+
+```{r}
+
+# Experimento 1: Máximo
+max_reflejos <- max(datos_reflejos$Distancia)
+print(max_reflejos)
+
+# Experimento 2: Máximo
+max_caudal <- max(datos_caudal$Tiempo_Llenado)
+print(max_caudal)
+
+
+```
+
+
+-   Cuantiles
+
+```{r}
+
+#Cuantiles
+
+# Experimento 1: 
+quantiles_reflejos <- quantile(datos_reflejos$Distancia, probs = c(0.25, 0.5, 0.75))
+print(quantiles_reflejos)
+
+# Experimento 2: 
+quantiles_caudal <- quantile(datos_caudal$Tiempo_Llenado, probs = c(0.25, 0.5, 0.75))
+print(quantiles_caudal)
+
+
+```
+
+
+-   Varianza
+
+```{r}
+
+#Varianza
+
+# Experimento 1: 
+varianza_reflejos <- var(datos_reflejos$Distancia)
+print(varianza_reflejos)
+
+# Experimento 2: 
+varianza_caudal <- var(datos_caudal$Tiempo_Llenado)
+print(varianza_caudal)
+
+
+```
+
+
+-   Desvío Estándar
+
+```{r}
+# Desvio Estándar
+
+# Experimento 1: 
+desvio_estandar_reflejos <- sd(datos_reflejos$Distancia)
+print(desvio_estandar_reflejos)
+
+# Experimento 2: 
+desvio_estandar_caudal <- sd(datos_caudal$Tiempo_Llenado)
+print(desvio_estandar_caudal)
+
+
+
+```
+
+
+-   Coeficiente de Variación
+
+```{r}
+# Coeficiente de Variación
+
+# Función para calcular el coeficiente de variación
+coeficiente_variacion <- function(x) {
+  cv <- sd(x) / mean(x) * 100
+  return(cv)
+}
+
+# Experimento 1: 
+cv_reflejos <- coeficiente_variacion(datos_reflejos$Distancia)
+print(cv_reflejos)
+
+# Experimento 2: 
+cv_caudal <- coeficiente_variacion(datos_caudal$Tiempo_Llenado)
+print(cv_caudal)
+
+
+
+```
+
+
+-   Error Estándar
+
+```{r}
+# Error Estándar
+
+# Primero verifico que 'plotrix' está instalado, sino, instalarlo
+if (!requireNamespace("plotrix", quietly = TRUE)) {
+  install.packages("plotrix")
+}
+
+library(plotrix)
+
+# Experimento 1: 
+error_estandar_reflejos <- std.error(datos_reflejos$Distancia)
+print(error_estandar_reflejos)
+
+# Experimento 2: 
+error_estandar_caudal <- std.error(datos_caudal$Tiempo_Llenado)
+print(error_estandar_caudal)
+
+
+```
+
+
+-   Asimetría
+
+```{r}
+# Asimetría
+
+# Verifico que el paquete 'moments' está instalado, sino, que se instale
+if (!requireNamespace("moments", quietly = TRUE)) {
+  install.packages("moments")
+}
+
+library(moments)
+
+# Experimento 1: 
+asimetria_reflejos <- skewness(datos_reflejos$Distancia)
+print(asimetria_reflejos)
+
+# Experimento 2: 
+asimetria_caudal <- skewness(datos_caudal$Tiempo_Llenado)
+print(asimetria_caudal)
+
+
+
+```
+
+
+-   Kurtosis
+
+```{r}
+# Kurtosis
+
+if (!requireNamespace("moments", quietly = TRUE)) {
+  install.packages("moments")
+}
+
+library(moments)
+
+# Experimento 1: 
+kurtosis_reflejos <- kurtosis(datos_reflejos$Distancia)
+print(kurtosis_reflejos)
+
+# Experimento 2: 
+kurtosis_caudal <- kurtosis(datos_caudal$Tiempo_Llenado)
+print(kurtosis_caudal)
+
+```
+
+
+-   Intervalo de confianza
+
+```{r}
+# Intervalo de confianza
+
+# Experimento 1: 
+intervalo_confianza_reflejos <- t.test(datos_reflejos$Distancia)$conf.int
+print(intervalo_confianza_reflejos)
+
+# Experimento 2: 
+intervalo_confianza_caudal <- t.test(datos_caudal$Tiempo_Llenado)$conf.int
+print(intervalo_confianza_caudal)
+
+```
+
+
+
+## Toda la información en un tibble
+
+-   Todos los índices en un solo tibble. Esto permite exportar la información ordenada.
+
+```{r}
+
+# Indice de las medidas de variación para el Experimento 1
+indices_reflejos <- datos_reflejos %>%
+  group_by(Persona, Mano) %>%
+  summarise(
+    Minimo = min(Distancia),
+    Maximo = max(Distancia),
+    Q1 = quantile(Distancia, probs = 0.25),
+    Mediana = median(Distancia),
+    Q3 = quantile(Distancia, probs = 0.75),
+    Media = mean(Distancia),
+    Varianza = var(Distancia),
+    Desvio_Estandar = sd(Distancia),
+    CV = (Desvio_Estandar / Media) * 100,
+    EE = std.error(Distancia),
+    Asimetria = skewness(Distancia),
+    Kurtosis = kurtosis(Distancia),
+    IC95_min = t.test(Distancia)$conf.int[1],
+    IC95_max = t.test(Distancia)$conf.int[2]
+  )
+
+print(indices_reflejos)
+
+# Indice de las medidas de variación para el Experimento 2
+indices_caudal <- datos_caudal %>%
+  group_by(Canilla, Temperatura) %>%
+  summarise(
+    Minimo = min(Tiempo_Llenado),
+    Maximo = max(Tiempo_Llenado),
+    Q1 = quantile(Tiempo_Llenado, probs = 0.25),
+    Mediana = median(Tiempo_Llenado),
+    Q3 = quantile(Tiempo_Llenado, probs = 0.75),
+    Media = mean(Tiempo_Llenado),
+    Varianza = var(Tiempo_Llenado),
+    Desvio_Estandar = sd(Tiempo_Llenado),
+    CV = (Desvio_Estandar / Media) * 100,
+    EE = std.error(Tiempo_Llenado),
+    Asimetria = skewness(Tiempo_Llenado),
+    Kurtosis = kurtosis(Tiempo_Llenado),
+    IC95_min = t.test(Tiempo_Llenado)$conf.int[1],
+    IC95_max = t.test(Tiempo_Llenado)$conf.int[2]
+  )
+
+print(indices_caudal)
+
+
+```
+
+
+## Gráficos
+
+-   Histogramas
+
+```{r}
+
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
+
+library(ggplot2)
+
+# Histograma para el Experimento 1
+ggplot(datos_reflejos, aes(x = Distancia, fill = Mano)) +
+  geom_histogram(binwidth = 2, position = "dodge", alpha = 0.7) +
+  facet_wrap(~ Persona) +
+  labs(title = "Histograma de Distancia de Reflejos",
+       x = "Distancia (cm)",
+       y = "Frecuencia") +
+  theme_minimal()
+
+# Histograma para el Experimento 2
+ggplot(datos_caudal, aes(x = Tiempo_Llenado, fill = Temperatura)) +
+  geom_histogram(binwidth = 0.5, position = "dodge", alpha = 0.7) +
+  facet_wrap(~ Canilla) +
+  labs(title = "Histograma de Tiempo de Llenado",
+       x = "Tiempo de Llenado (segundos)",
+       y = "Frecuencia") +
+  theme_minimal()
+
+
+
+```
+
+
+-   Densidad
+
+```{r}
+
+# Gráfico de densidad para el Experimento 1
+ggplot(datos_reflejos, aes(x = Distancia, fill = Mano, color = Mano)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~ Persona) +
+  labs(title = "Densidad de Distancia de Reflejos",
+       x = "Distancia (cm)",
+       y = "Densidad") +
+  theme_minimal()
+
+# Gráfico de densidad para el Experimento 2
+ggplot(datos_caudal, aes(x = Tiempo_Llenado, fill = Temperatura, color = Temperatura)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~ Canilla) +
+  labs(title = "Densidad de Tiempo de Llenado",
+       x = "Tiempo de Llenado (segundos)",
+       y = "Densidad") +
+  theme_minimal()
+
+
+
+```
+
+
+-   Probabilidad acumulada
+
+```{r}
+
+# Gráfico de probabilidad acumulada para el Experimento 1
+ggplot(datos_reflejos, aes(x = Distancia, color = Mano)) +
+  stat_ecdf(geom = "step") +
+  facet_wrap(~ Persona) +
+  labs(title = "Probabilidad Acumulada de Distancia de Reflejos",
+       x = "Distancia (cm)",
+       y = "Probabilidad Acumulada") +
+  theme_minimal()
+
+# Gráfico de probabilidad acumulada para el Experimento 2
+ggplot(datos_caudal, aes(x = Tiempo_Llenado, color = Temperatura)) +
+  stat_ecdf(geom = "step") +
+  facet_wrap(~ Canilla) +
+  labs(title = "Probabilidad Acumulada de Tiempo de Llenado",
+       x = "Tiempo de Llenado (segundos)",
+       y = "Probabilidad Acumulada") +
+  theme_minimal()
+
+
+```
+
+
+-   Box Plot y violín
+
+```{r}
+
+# Gráfico de Box Plot y violín para el Experimento 1
+ggplot(datos_reflejos, aes(x = Mano, y = Distancia, fill = Mano)) +
+  geom_violin(alpha = 0.5) +
+  geom_boxplot(width = 0.1, color = "black", alpha = 0.7) +
+  facet_wrap(~ Persona) +
+  labs(title = "Box Plot y Gráfico de Violín de la Distancia de Reflejos",
+       x = "Mano",
+       y = "Distancia (cm)") +
+  theme_minimal()
+
+# Gráfico de Box Plot y violín para el Experimento 2
+ggplot(datos_caudal, aes(x = Temperatura, y = Tiempo_Llenado, fill = Temperatura)) +
+  geom_violin(alpha = 0.5) +
+  geom_boxplot(width = 0.1, color = "black", alpha = 0.7) +
+  facet_wrap(~ Canilla) +
+  labs(title = "Box Plot y Gráfico de Violín del Tiempo de Llenado",
+       x = "Temperatura",
+       y = "Tiempo de Llenado (segundos)") +
+  theme_minimal()
+
+
+
+```
+
+
+# Sugerencias
+
+En el siguiente sitio hay varios test de reflejos, memoria etc. que podrían realizar varias veces cada uno y recopilar datos de esta manera. Obviamente debe haber infinidad de este tipo de sitios, puede elejir el que le resulte más adecuado. <https://www.arealme.com/apm-actions-per-minute-test/es/>
+
+En realidad el sitio anterior tiene muchos otros tipos de tests que podría usar. <https://www.arealme.com/es>
+
+Puede recopilar una serie de objetos similares (por ejemplo plantas), y medirle varias cosas a cada una (como altura, peso, cantidad de hojas, cantidad de flores).
+
+Armar una encuesta por teléfono que tenga 4 preguntas, 2 para responder con números reales, y 2 con números enteros. Ejemplo, ¿Cuántas veces por día se sienta a comer?, ¿Cuántos días por semana come usted carne?, Estime cuánta agua consume por día (en litros), ¿Cuánto tiempo promedio dedica cada vez que se sienta a comer? (en minutos), etc. Una encuesta así puede armarse con los formularios de google. Aquí un ejemplo: <https://docs.google.com/forms/d/e/1FAIpQLSee2VpYipwupnrGSA1Iz3m7_wNtoq_UHquwPa-ApN3WxVcefA/viewform?usp=sf_link>
+
+Podría pararse en una esquina transitada de 9 de Julio y contar cuántas personas viajan en cada auto que pase durante un rato, cuánto tiempo transcurre entre la pasada de un auto y el siguiente, cantidad de autos que pasan en un período de tiempo fijo, generar categorías de vehículos (bicicleta, moto, auto, camioneta, etc.) y contar cuántos pasan de cada uno en un período de tiempo fijo, si hace marcas en el asfalto puede medir tiempos en recorrer cierta distancia y así calcular la velocidad, etc. Este experimento puede repetirse en diferentes momentos del día.
+
+Los ejemplos anteriores son para inducir su imaginación, hay infinidad de cosas para medir. Sólo piense en algo que le genere curiosidad y luego pregúntese qué y cómo puede medirlo. Inténte algo que le divierta aunque no salga como esperaba.
