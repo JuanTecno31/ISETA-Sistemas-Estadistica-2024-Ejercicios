@@ -1,0 +1,289 @@
+---
+title: "25 - Regresión - Ejercicios"
+output: html_notebook
+---
+
+# Regresión
+
+En todos los casos grafique los datos para visualizarlos de la mejor manera que se le ocurra.
+
+## 1. Regresión múltiple con mtcars
+
+Objetivo: Determinar los factores que afectan el consumo de combustible de los automóviles.
+
+Utiliza el dataset mtcars. La variable respuesta será mpg (millas por galón). Usa los siguientes predictores:
+-     wt (peso del auto)
+-     hp (caballos de fuerza)
+-     cyl (número de cilindros)
+-     gear (número de marchas)
+-   Evalúa los supuestos del modelo:
+-   Analiza los residuos para verificar homocedasticidad y normalidad.
+-   Interpreta los coeficientes estimados. ¿Qué variables tienen un impacto significativo en el consumo?
+
+```{r}
+# install.packages("gridExtra")
+library(ggplot2)
+library(gridExtra)
+
+p1 <- ggplot(mtcars, aes(x = wt, y = mpg)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  ggtitle("Cons.Fuel vs Peso")
+
+p2 <- ggplot(mtcars, aes(x = hp, y = mpg)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  ggtitle("Cons.Fuel vs Cab.Fuerza")
+
+p3 <- ggplot(mtcars, aes(x = factor(cyl), y = mpg)) + 
+  geom_boxplot() + 
+  ggtitle("Cons.Fuel por Núm.Cilindros")
+
+p4 <- ggplot(mtcars, aes(x = factor(gear), y = mpg)) + 
+  geom_boxplot() + 
+  ggtitle("Cons.Fuel por Núm.Marchas")
+
+grid.arrange(p1, p2, p3, p4, ncol = 2)
+
+model_mtcars <- lm(mpg ~ wt + hp + cyl + gear, data = mtcars)
+summary(model_mtcars)
+
+# Test de homocedasticidad
+
+par(mfrow = c(2, 2))
+plot(model_mtcars)
+
+# Test de normalidad
+
+shapiro.test(residuals(model_mtcars))
+
+# Variable Significativa: El peso del automóvil (wt) es la única variable con un impacto significativo en el consumo de combustible (mpg).
+
+# Variables No Significativas: Los caballos de fuerza (hp), el número de cilindros (cyl) y el número de marchas (gear) no muestran un impacto significativo en el consumo de combustible en este análisis.
+
+```
+
+
+## 2. Ejercicio: Predicción de precios con diamonds
+
+Objetivo: Predecir el precio de los diamantes en función de sus características.
+
+Trabaja con el dataset diamonds del paquete ggplot2. 
+-   ¿Cuál será la variable respuesta para cumplir con el objetivo?
+-   Elija los predictores adecuados.
+-   Evalúa la bondad de ajuste mediante el R² ajustado.
+-   Compara dos modelos: uno con todos los predictores y otro más simple (elimina una o más variables).
+
+```{r}
+
+# Paso 1: Cargo el paquete
+library(ggplot2)
+data(diamonds)
+
+# Paso 2: Elijo la variable respuesta
+
+# La variable respuesta en este análisis es 'price', que representa el precio de los diamantes.
+
+# Carat vs Precio
+ggplot(diamonds, aes(x = carat, y = price)) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(method = "lm", col = "red") + 
+  theme_minimal() + 
+  labs(title = "Relación entre Carat y Precio", x = "Carat", y = "Precio")
+
+# Depth vs Precio
+ggplot(diamonds, aes(x = depth, y = price)) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(method = "lm", col = "blue") + 
+  theme_minimal() + 
+  labs(title = "Relación entre Depth y Precio", x = "Depth", y = "Precio")
+
+# Table vs Precio
+ggplot(diamonds, aes(x = table, y = price)) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(method = "lm", col = "green") + 
+  theme_minimal() + 
+  labs(title = "Relación entre Table y Precio", x = "Table", y = "Precio")
+
+# X vs Precio
+ggplot(diamonds, aes(x = x, y = price)) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(method = "lm", col = "purple") + 
+  theme_minimal() + 
+  labs(title = "Relación entre X y Precio", x = "X", y = "Precio")
+
+# Y vs Precio
+ggplot(diamonds, aes(x = y, y = price)) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(method = "lm", col = "orange") + 
+  theme_minimal() + 
+  labs(title = "Relación entre Y y Precio", x = "Y", y = "Precio")
+
+# Z vs Precio
+ggplot(diamonds, aes(x = z, y = price)) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(method = "lm", col = "brown") + 
+  theme_minimal() + 
+  labs(title = "Relación entre Z y Precio", x = "Z", y = "Precio")
+
+# En base a los graficos elijo 'carat', 'cut', 'color' y 'clarity' como los predictores más adecuados ya que tienen una fuerte relación con el precio de los diamantes.
+
+modelo_optimo <- lm(price ~ carat + cut + color + clarity, data = diamonds)
+
+
+# Paso 4: Bondad de ajuste
+
+bondad_optimo <- summary(modelo_optimo)$adj.r.squared
+
+cat("R² ajustado del modelo con los predictores adecuados:", bondad_optimo, "\n")
+
+# Paso 5: Comparo dos modelos
+
+modelo_1 <- lm(price ~ carat + cut + color + clarity + depth + table + x + y + z, data = diamonds)
+
+modelo_2 <- lm(price ~ carat + cut + color + clarity + depth, data = diamonds)
+
+resumen_completo <- summary(modelo_1)
+resumen_simplificado <- summary(modelo_2)
+
+
+r2_completo <- resumen_completo$adj.r.squared
+r2_simplificado <- resumen_simplificado$adj.r.squared
+
+
+cat("R² ajustado del modelo completo:", r2_completo, "\n")
+cat("R² ajustado del modelo simplificado:", r2_simplificado, "\n")
+
+```
+
+
+## 3. Ejercicio: Regresión múltiple con interacciones usando iris
+
+Objetivo: Estimar la longitud del pétalo en función de otras características y explorar interacciones.
+
+-   Utiliza el dataset iris. Elije una variable respuesta a explicar con las otras.
+-   ¿Cuáles son los posibles predictores?
+-   Introduce términos de interacción entre Species y las otras variables para evaluar si las relaciones difieren según la especie.
+-   Verifica si los coeficientes de las interacciones son significativos.
+
+```{r}
+# Paso 1: Cargo el dataset iris
+library(ggplot2)
+data(iris)
+
+# La variable respuesta es "Petal.Length"
+
+# Paso 2: Los predictores son "Sepal.Length", "Sepal.Width", "Petal.Width", y "Species"
+
+modelo <- lm(Petal.Length ~ Sepal.Length * Species + Sepal.Width + Petal.Width, data = iris)
+
+# Paso 3: Interaccion entre Species y las otras variables
+
+modelo_interacciones <- lm(Petal.Length ~ Sepal.Length * Species + Sepal.Width * Species + Petal.Width * Species, data = iris)
+
+# Paso 5: Verifico la significancia de los coeficientes
+
+interacciones <- summary(modelo_interacciones)
+valores_p <- interacciones$coefficients[,4]
+
+coeficientes <- interacciones$coefficients
+print(coeficientes)
+
+significativos <- coeficientes[valores_p < 0.05,]
+print("Coeficientes significativos:")
+print(significativos)
+
+
+# Grafico
+
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color = Species)) +
+  geom_point() +  
+  geom_smooth(method = "lm", aes(group = Species), se = FALSE) +
+  labs(title = "Relación entre Sepal.Length y Petal.Length por Especie",
+       x = "Longitud del Sépalo",
+       y = "Longitud del Pétalo") +
+  theme_minimal() + 
+  theme(legend.title = element_blank())
+
+```
+
+
+
+## 4. Modelado de datos ecológicos con airquality
+
+Objetivo: Evaluar cómo diferentes factores ambientales afectan los niveles de ozono.
+
+-   ¿Cuál será la variable respuesta para cumplir con el objetivo?
+-   ¿Cuáles son los posibles predictores?
+-   Verifica si hay datos faltantes y decide cómo tratarlos (e.g., eliminación de casos o imputación).
+-   Ajusta un modelo de regresión y analiza qué factores afectan significativamente la concentración de ozono.
+-   Interpreta los resultados y sugiere acciones que podrían ayudar a reducir los niveles de ozono.
+
+```{r}
+data(airquality)
+
+
+# Paso 1: Encontrar la variable respuesta
+
+ggplot(airquality, aes(x = Temp, y = Ozone)) +
+  geom_point(alpha = 0.5) +  # Puntos de datos
+  labs(title = "Concentración de Ozono vs. Temperatura",
+       x = "Temperatura (°F)",
+       y = "Concentración de Ozono (ppb)") +
+  theme_minimal()
+
+# La variable respuesta para evaluar cómo los diferentes factores ambientales afectan los niveles de ozono es "Ozone".
+
+# Paso 2: Posibles predictores
+
+correlations <- cor(airquality, use = "complete.obs")
+print(correlations)
+
+# En base a los resultados de las correlaciones, los posibles predictores son Solar.R, Wind y Temp
+
+# Paso 3: Verificar y visualizar los datos faltantes
+
+missing_data <- colSums(is.na(airquality))
+print(missing_data)
+
+barplot(missing_data, 
+        main = "Datos Faltantes en el Dataset airquality",
+        xlab = "Variables",
+        ylab = "Número de Datos Faltantes",
+        col = "lightblue",
+        ylim = c(0, max(missing_data) + 5))
+
+# La cantidad de datos faltantes es relativamente baja pero decido hacer un analisis de sensibilidad para ver como afecta a los resultados con y sin imputación
+
+modelo_sin_imputacion <- lm(Ozone ~ Solar.R + Wind + Temp, data = na.omit(airquality))
+
+modelo_imputado <- airquality
+modelo_imputado$Ozone[is.na(modelo_imputado$Ozone)] <- mean(modelo_imputado$Ozone, na.rm = TRUE)
+modelo_imputado$Solar.R[is.na(modelo_imputado$Solar.R)] <- mean(modelo_imputado$Solar.R, na.rm = TRUE)
+
+# Graficos con y sin imputacion para visualizar las diferencias
+
+grafico1 <- ggplot(modelo_sin_imputacion, aes(x = Solar.R, y = Ozone)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "blue", se = FALSE) +
+  labs(title = "Modelo sin Imputación", x = "Solar.R", y = "Ozone")
+
+grafico2 <- ggplot(modelo_imputado, aes(x = Solar.R, y = Ozone)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(title = "Modelo con Imputación", x = "Solar.R", y = "Ozone")
+
+grid.arrange(grafico1, grafico2, nrow = 1)
+
+# Paso 4: Modelo de regresión
+
+modelo_regresion <- lm(Ozone ~ Solar.R + Wind + Temp, data = modelo_imputado)
+
+regresion <- summary(modelo_regresion)
+cat("Datos del modelo de regresión: /n")
+print(regresion)
+
+# Segun el modelo de regresión, los factores que afectan significativamente la concentracion de ozono son: la radiación solar (Solar.R), el viento (Wind) y la temperatura (Temp)
+
+```
+

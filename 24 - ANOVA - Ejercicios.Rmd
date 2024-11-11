@@ -1,0 +1,373 @@
+---
+title: "24 - ANOVA - Ejercicios"
+output: html_notebook
+---
+
+# ANOVA
+
+## 1. Ejercicio: Rotura de lana
+
+Se realizó un experimento para evaluar el efecto de dos factores sobre la cantidad de rupturas en un tejido: el tipo de lana (wool) y la tensión aplicada (tension). Los datos están en el dataset warpbreaks.
+
+-   Use la ayuda para comprender mejor los datos.
+-   Grafique los datos.
+
+
+```{r}
+data("warpbreaks")
+
+library(ggplot2)
+ggplot(warpbreaks, aes(x = tension, y = breaks, fill = wool)) +
+  geom_boxplot() +
+  labs(title = "Rupturas de lana según tipo y tensión") +
+  theme_minimal()
+
+interaction.plot(warpbreaks$tension, warpbreaks$wool, warpbreaks$breaks, 
+                 col = c("red", "blue"), legend = TRUE,
+                 xlab = "Tensión", ylab = "Rupturas", main = "Interacción entre tipo de lana y tensión")
+
+```
+
+-   Verifique los supuestos.
+
+```{r}
+# modelo ANOVA
+modelo <- aov(breaks ~ wool * tension, data=warpbreaks)
+
+# Prueba de Shapiro-Wilk para normalidad
+shapiro.test(residuals(modelo))
+
+#Homogeneidad de varianza
+bartlett.test(breaks ~ interaction(wool, tension), data = warpbreaks)
+
+```
+
+```{r}
+
+plot(modelo, 1) 
+
+library(car)
+leveneTest(breaks ~ wool * tension, data = warpbreaks)
+
+```
+
+
+-   Plantee las hipótesis nula y alternativa para cada factor y la interacción.
+
+```{r}
+
+# Planteo de hipótesis para cada factor y la interacción
+
+# Hipótesis para el Factor Wool (Tipo de lana)
+
+# H0: No hay diferencia significativa en la cantidad de rupturas (breaks) entre los tipos de lana
+# H1: Existe una diferencia significativa en la cantidad de rupturas entre los tipos de lana.
+
+# Hipótesis para el Factor Tension (Tensión aplicada)
+
+# H0: No hay diferencia significativa en la cantidad de rupturas según la tensión aplicada.
+# H1: Existe una diferencia significativa en la cantidad de rupturas según la tensión aplicada.
+
+# Hipótesis para la Interacción entre Wool y Tension
+
+# H0: No hay interacción significativa entre el tipo de lana y la tensión en la cantidad de rupturas.
+# H1: Existe una interacción significativa entre el tipo de lana y la tensión en la cantidad de rupturas.
+
+
+```
+
+-   Realice un ANOVA de dos factores con interacción para analizar el número de rupturas (breaks).
+
+```{r}
+TukeyHSD(modelo)
+
+```
+
+
+-   ¿Qué factor tiene mayor efecto sobre las rupturas? ¿Existe interacción significativa entre ambos factores?
+
+```{r}
+
+summary(modelo)
+
+# El factor que tiene mas efecto sobre las rupturas es la tension
+# La interacción significativa entre wool y tension sugiere que el impacto de la tensión en las rupturas varía según el tipo de lana utilizado.
+
+```
+
+-   En caso de encontrar significancia, realiza un análisis post-hoc adecuado y grafica los resultados.
+
+```{r}
+
+post_hoc <- TukeyHSD(modelo)
+
+print(post_hoc)
+
+library(ggplot2)
+
+ggplot(warpbreaks, aes(x = tension, y = breaks, color = wool)) +
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  stat_summary(fun = mean, geom = "line", aes(group = wool)) +
+  labs(title = "Interacción entre tipo de lana y tensión sobre las rupturas",
+       x = "Tensión aplicada", y = "Número de rupturas") +
+  theme_minimal()
+
+# Gráfico de los resultados de Tukey
+
+plot(post_hoc, las = 1, col = "blue")
+
+
+```
+
+
+## 2. Ejercicio: Absorción de CO2
+
+Un estudio botánico analizó la absorción de CO2 por plantas de dos tipos (Type) bajo dos tratamientos (Treatment). 
+Los datos están en el dataset CO2
+
+-   Use la ayuda para comprender mejor los datos.
+-   Grafique los datos.
+
+```{r}
+
+data("CO2")
+
+library(ggplot2)
+
+ggplot(CO2, aes(x = Treatment, y = uptake, fill = Type)) +
+  geom_boxplot() +
+  labs(title = "Boxplot de Absorción de CO2 por Tipo de Planta y Tratamiento",
+       x = "Tratamiento",
+       y = "Absorción de CO2") +
+  theme_minimal()
+
+```
+
+-   Verifique los supuestos.
+
+```{r}
+anova_model <- aov(uptake ~ Type * Treatment, data = CO2)
+
+# normalidad
+
+shapiro_test <- shapiro.test(residuals(anova_model))
+print(shapiro_test)
+
+bartlett.test(uptake ~ interaction(Type, Treatment), data = CO2)
+
+```
+
+
+-   Formule las hipótesis nulas y alternativas para ambos factores y la interacción.
+
+```{r}
+# Planteo de hipótesis para cada factor y la interacción
+
+# Hipótesis para el Factor Type
+
+# H0: No hay diferencias en la absorción de CO2 entre los tipos de plantas.
+# H1: Hay diferencia en la absorción de CO2 entre los tipos de plantas.
+
+# Hipótesis para el Factor Treatment 
+
+# H0: No hay diferencias en la absorción de CO2 entre los tratamientos.
+# H1: Hay diferencias en la absorción de CO2 entre los tratamientos.
+
+# Hipótesis para la Interacción entre Type y Treatment
+
+# H0: NNo hay interacción entre el tipo de planta y el tratamiento en la absorción de CO2.
+# H1: Hay interacción entre el tipo de planta y el tratamiento en la absorción de CO2..
+```
+
+-   Realice un ANOVA de dos factores con interacción entre Type y Treatment para explicar la absorción de CO2 (uptake).
+
+```{r}
+anova_results <- summary(anova_model)
+print(anova_results)
+```
+
+-   ¿Existe una interacción significativa entre el tipo de planta y el tratamiento aplicado?
+
+```{r}
+# El p_value para la interacción entre el tipo de planta y el tratamiento fue de 0.064213, esto indica que no existe una interacción significativa entre el tipo de planta y el tratamiento aplicado al nivel de significancia del 5% (0.05).")
+
+```
+
+-   Interpreta los resultados y discute cómo se relacionan los efectos principales con la interacción.
+
+```{r}
+# La falta de una interacción significativa implica que los efectos de Type y Treatment son independientes. Esto significa que, aunque tanto el tipo de planta como el tratamiento afectan la absorción de CO2, la magnitud del efecto de un tratamiento específico no varía de manera significativa entre los diferentes tipos de plantas.
+```
+
+
+
+## 3. Ejercicio: Efectividad de insecticidas
+
+Se probaron seis tipos de insecticidas (spray) para evaluar su efectividad en la eliminación de insectos. 
+Los datos están en el dataset InsectSprays
+
+-   Use la ayuda para comprender mejor los datos.
+-   Grafique los datos.
+
+```{r}
+data("InsectSprays")
+
+# Boxplot de la efectividad de los insecticidas
+ggplot(InsectSprays, aes(x = spray, y = count)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Efectividad de Insecticidas",
+       x = "Tipo de Insecticida (spray)",
+       y = "Número de Insectos Eliminados") +
+  theme_minimal()
+
+print(InsectSprays)
+
+```
+
+
+-   Verifique los supuestos.
+
+```{r}
+# Test de normalidad para cada grupo
+library(dplyr)
+
+normality_tests <- InsectSprays %>%
+  group_by(spray) %>%
+  summarise(shapiro_p = shapiro.test(count)$p.value)
+
+print(normality_tests)
+
+# Homogeneidad
+
+bartlett.test(count ~ spray, data = InsectSprays)
+print(bartlett_test)
+
+```
+
+-   Plantee las hipótesis nula y alternativa para este ANOVA.
+
+```{r}
+# H0: No hay diferencias en la efectividad entre los insecticidas.
+# H1: Hay al menos un insecticida que es significativamente diferente en efectividad respecto a los demás.
+```
+
+-   Realice un ANOVA de un factor para evaluar el efecto del tipo de spray sobre el conteo de insectos (count).
+
+```{r}
+anova_result <- aov(count ~ spray, data = InsectSprays)
+summary(anova_result)
+```
+
+-   En caso de encontrar diferencias significativas, realiza un test de Tukey para identificar qué tipos de sprays difieren significativamente entre sí.
+
+```{r}
+# Test de Tukey
+tukey_result <- TukeyHSD(anova_result)
+print(tukey_result)
+
+```
+
+-   Grafica los resultados del análisis post-hoc.
+
+```{r}
+plot(tukey_result)
+```
+
+
+## 4. Ejercicio: Dieta sobre crecimiento de pollos
+
+> Aclaración, este ejercicio tiene una característica que requiere de un análisis algo diferente, ya que a cada pollo se le midió el peso varias veces a lo largo del tiempo. Sin embargo realizaremos aquí un ANOVA común, luego les mostraré la alternativa.
+
+Una investigación desea evaluar si existe una interacción significativa entre el tipo de dieta y el tiempo de medición sobre el peso de los pollos. 
+Los datos están en el dataset ChickWeight
+
+-   Use la ayuda para comprender mejor los datos.
+-   Grafique los datos.
+
+```{r}
+data("ChickWeight")
+
+ggplot(ChickWeight, aes(x = Time, y = weight, color = Diet)) +
+  geom_line(aes(group = Chick), alpha = 0.5) +
+  geom_point() +
+  labs(title = "Peso de Pollos a lo Largo del Tiempo por Tipo de Dieta",
+       x = "Tiempo (días)",
+       y = "Peso (g)") +
+  theme_minimal()
+```
+
+-   Verifique los supuestos.
+
+```{r}
+anova_model <- aov(weight ~ Diet * Time, data = ChickWeight)
+residuals <- residuals(anova_model)
+
+#Normalidad
+
+shapiro.test(residuals)
+
+#Homogeneidad
+# Combino dos variables en una sola para aplicar el test
+DietaTiempo <- interaction(ChickWeight$Diet, ChickWeight$Time)
+
+bartlett.test(weight ~ DietaTiempo, data = ChickWeight)
+```
+
+-   Plantee las hipótesis nula y alternativa para ambos factores y su interacción.
+
+```{r}
+# 1.Hipótesis para el Factor "Dieta"
+
+# H0: No hay diferencia en el peso de los pollos entre los diferentes tipos de dieta.
+
+# H1: Al menos un tipo de dieta tiene un efecto significativo en el peso de los pollos.
+
+# 2. Hipótesis para el Factor "Tiempo"
+# H0: No hay diferencia en el peso de los pollos en diferentes momentos de medición.
+
+# H1: Al menos un tiempo de medición tiene un efecto significativo en el peso de los pollos.
+
+# 3.Hipótesis para la Interacción entre "Dieta" y "Tiempo"
+
+# H0: No hay interacción significativa entre el tipo de dieta y el tiempo de medición en su efecto sobre el peso de los pollos.
+
+# H1: Existe una interacción significativa entre el tipo de dieta y el tiempo de medición en su efecto sobre el peso de los pollos.
+
+```
+
+-   Realice un ANOVA de dos factores con interacción (Diet y Time) para explicar el peso (weight).
+
+```{r}
+
+anova_model <- aov(weight ~ Diet * Time, data = ChickWeight)
+summary(anova_model)
+
+```
+
+-   Interprete los resultados del análisis. 
+
+```{r}
+# Efecto de la Dieta:
+
+# Hay diferencias significativas en el peso de los pollos entre los diferentes tipos de dieta ya que el p_value es menor a 0.05. Lo que esto sugiere, es que al menos una dieta afecta el peso de manera diferente a las otras.
+
+# Efecto del Tiempo:
+
+# Nuevamente el p_value es menor que 0.05. Por lo tanto, el tiempo de medición también tiene un efecto significativo en el peso de los pollos. Esto indica que el peso cambia significativamente con el tiempo.
+
+# Interacción entre Dieta y Tiempo:
+
+# La interacción entre la dieta y el tiempo es significativa (p_value < 0.05). Esto significa que el efecto de la dieta en el peso depende del tiempo de medición, lo que sugiere que el impacto de cada dieta puede variar en diferentes momentos.
+```
+
+-   Si existen diferencias significativas, realiza un análisis post-hoc para determinar qué combinaciones de niveles presentan diferencias.
+
+```{r}
+summary(anova_model)
+tukey_result <- TukeyHSD(anova_model)
+
+print(tukey_result)
+plot(tukey_result)
+
+```
+
